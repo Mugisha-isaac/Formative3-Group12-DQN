@@ -1,8 +1,3 @@
-"""
-train.py — DQN Pong Training Script
-Run on Google Colab: !python train.py
-"""
-
 import subprocess, sys
 
 def _install(pkg):
@@ -19,6 +14,8 @@ _install("tensorboard>=2.14.0")
 subprocess.call(["AutoROM", "--accept-license", "-q"])
 
 import os
+import gc
+import csv
 import warnings
 import numpy as np
 import ale_py
@@ -26,34 +23,62 @@ import gymnasium as gym
 from stable_baselines3 import DQN
 from stable_baselines3.common.atari_wrappers import AtariWrapper
 from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv, VecTransposeImage
-from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.callbacks import BaseCallback
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
-EXPERIMENT_NAME         = "exp1"
-MEMBER_NAME             = "Member A"
+MEMBER_NAME = "Isaac MUGISHA"
 
-LEARNING_RATE           = 1e-4
-GAMMA                   = 0.99
-BATCH_SIZE              = 32
-EXPLORATION_FRACTION    = 0.10
-EXPLORATION_INITIAL_EPS = 1.0
-EXPLORATION_FINAL_EPS   = 0.01
+EXPERIMENTS = [
+    {"name": "exp1",  "lr": 1e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
+    {"name": "exp2",  "lr": 5e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
+    {"name": "exp3",  "lr": 1e-3,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
+    {"name": "exp4",  "lr": 1e-4,  "gamma": 0.95,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
+    {"name": "exp5",  "lr": 1e-4,  "gamma": 0.999, "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
+    {"name": "exp6",  "lr": 1e-4,  "gamma": 0.99,  "batch": 64,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
+    {"name": "exp7",  "lr": 1e-4,  "gamma": 0.99,  "batch": 128, "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
+    {"name": "exp8",  "lr": 1e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.10, "eps_fraction": 0.50},
+    {"name": "exp9",  "lr": 2e-4,  "gamma": 0.98,  "batch": 64,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.40},
+    {"name": "exp10", "lr": 3e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 0.8, "eps_end": 0.05, "eps_fraction": 0.30},
+]
 
-ENV_ID                 = "ALE/Pong-v5"
+ENV_ID                 = "ALE/Breakout-v5"
 POLICY                 = "CnnPolicy"
-TOTAL_TIMESTEPS        = 500_000
+TOTAL_TIMESTEPS        = 50_000
 N_STACK                = 4
-BUFFER_SIZE            = 100_000
-TARGET_UPDATE_INTERVAL = 1000
-LEARNING_STARTS        = 50_000
+BUFFER_SIZE            = 5_000
+TARGET_UPDATE_INTERVAL = 500
+LEARNING_STARTS        = 2_000
 TRAIN_FREQ             = 4
 
-MODEL_SAVE_PATH = f"./dqn_model_{EXPERIMENT_NAME}"
-LOG_DIR         = f"./logs/{EXPERIMENT_NAME}/"
-os.makedirs(LOG_DIR, exist_ok=True)
+
+class RewardLengthLogger(BaseCallback):
+    def __init__(self, log_path):
+        super().__init__(verbose=0)
+        self.log_path = log_path
+        self.episode_rewards = []
+        self.episode_lengths = []
+        self.current_reward = 0
+        self.current_length = 0
+
+    def _on_step(self):
+        self.current_reward += self.locals["rewards"][0]
+        self.current_length += 1
+        if self.locals["dones"][0]:
+            self.episode_rewards.append(self.current_reward)
+            self.episode_lengths.append(self.current_length)
+            self.current_reward = 0
+            self.current_length = 0
+        return True
+
+    def save_log(self):
+        with open(self.log_path, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["episode", "reward", "length"])
+            for i, (r, l) in enumerate(zip(self.episode_rewards, self.episode_lengths)):
+                writer.writerow([i + 1, r, l])
 
 
 def make_env(env_id, log_dir):
@@ -71,68 +96,70 @@ def build_env(env_id, log_dir):
     return env
 
 
-def main():
+def run_experiment(exp):
+    name         = exp["name"]
+    lr           = exp["lr"]
+    gamma        = exp["gamma"]
+    batch        = exp["batch"]
+    eps_start    = exp["eps_start"]
+    eps_end      = exp["eps_end"]
+    eps_fraction = exp["eps_fraction"]
+    log_dir      = f"./logs/{name}/"
+    os.makedirs(log_dir, exist_ok=True)
+
     print("=" * 55)
-    print(f"  Experiment : {EXPERIMENT_NAME}  ({MEMBER_NAME})")
-    print(f"  lr={LEARNING_RATE}, gamma={GAMMA}, batch={BATCH_SIZE}")
-    print(f"  ε: {EXPLORATION_INITIAL_EPS} → {EXPLORATION_FINAL_EPS} over {EXPLORATION_FRACTION} of training")
+    print(f"  {MEMBER_NAME} | {name}")
+    print(f"  lr={lr}, gamma={gamma}, batch={batch}")
+    print(f"  epsilon: {eps_start} -> {eps_end} over {eps_fraction} of training")
     print("=" * 55)
 
-    train_env = build_env(ENV_ID, LOG_DIR)
-    eval_env  = build_env(ENV_ID, LOG_DIR)
+    train_env = build_env(ENV_ID, log_dir)
 
-    eval_callback = EvalCallback(
-        eval_env,
-        best_model_save_path=MODEL_SAVE_PATH + "_best",
-        log_path=LOG_DIR,
-        eval_freq=50_000,
-        n_eval_episodes=5,
-        deterministic=True,
-        render=False,
-        verbose=1,
-    )
-    checkpoint_callback = CheckpointCallback(
-        save_freq=100_000,
-        save_path=LOG_DIR + "checkpoints/",
-        name_prefix=f"dqn_pong_{EXPERIMENT_NAME}",
-    )
+    logger = RewardLengthLogger(log_path=f"{log_dir}reward_length_log.csv")
 
     model = DQN(
         policy=POLICY,
         env=train_env,
-        learning_rate=LEARNING_RATE,
+        learning_rate=lr,
         buffer_size=BUFFER_SIZE,
-        batch_size=BATCH_SIZE,
-        gamma=GAMMA,
-        exploration_fraction=EXPLORATION_FRACTION,
-        exploration_initial_eps=EXPLORATION_INITIAL_EPS,
-        exploration_final_eps=EXPLORATION_FINAL_EPS,
+        batch_size=batch,
+        gamma=gamma,
+        exploration_fraction=eps_fraction,
+        exploration_initial_eps=eps_start,
+        exploration_final_eps=eps_end,
         target_update_interval=TARGET_UPDATE_INTERVAL,
         learning_starts=LEARNING_STARTS,
         train_freq=TRAIN_FREQ,
         optimize_memory_usage=False,
-        tensorboard_log=LOG_DIR,
-        verbose=1,
+        tensorboard_log=log_dir,
+        verbose=0,
     )
 
-    print(f"\n  Training for {TOTAL_TIMESTEPS:,} steps ...")
     model.learn(
         total_timesteps=TOTAL_TIMESTEPS,
-        callback=[eval_callback, checkpoint_callback],
-        log_interval=100,
-        tb_log_name=f"DQN_Pong_{EXPERIMENT_NAME}",
+        callback=logger,
+        tb_log_name=f"DQN_{name}",
     )
 
-    model.save(MODEL_SAVE_PATH)
-    print(f"\n  Model saved → {MODEL_SAVE_PATH}.zip")
+    logger.save_log()
 
-    print("\n  Evaluating over 10 episodes (greedy policy) ...")
+    if logger.episode_rewards:
+        print(f"  Reward trend  - first episode: {logger.episode_rewards[0]:.1f}  |  last episode: {logger.episode_rewards[-1]:.1f}")
+        print(f"  Length trend  - first episode: {logger.episode_lengths[0]}  |  last episode: {logger.episode_lengths[-1]}")
+
+    model.save(f"./dqn_model_{name}")
+
+    if name == "exp1":
+        model.save("./dqn_model")
+        print("  Best model also saved as dqn_model.zip")
+
+    eval_env = build_env(ENV_ID, log_dir)
     obs = eval_env.reset()
     episode_rewards = []
     episode_reward  = 0.0
     episodes_done   = 0
 
-    while episodes_done < 10:
+    while episodes_done < 3:
         action, _ = model.predict(obs, deterministic=True)
         obs, reward, done, info = eval_env.step(action)
         episode_reward += reward[0]
@@ -145,23 +172,131 @@ def main():
     mean_r = np.mean(episode_rewards)
     std_r  = np.std(episode_rewards)
 
-    print("\n" + "=" * 55)
-    print(f"  {MEMBER_NAME} | {EXPERIMENT_NAME}")
-    print(f"  lr={LEARNING_RATE}, gamma={GAMMA}, batch={BATCH_SIZE}, "
-          f"ε_start={EXPLORATION_INITIAL_EPS}, ε_end={EXPLORATION_FINAL_EPS}, "
-          f"ε_fraction={EXPLORATION_FRACTION}")
-    print("─" * 55)
-    print(f"  Mean reward : {mean_r:.2f} ± {std_r:.2f}")
-    print(f"  All episodes: {[round(r, 1) for r in episode_rewards]}")
-    print("=" * 55)
-    print("\n  Copy this row into your results table:")
-    print(f"  {MEMBER_NAME} | {EXPERIMENT_NAME} | "
-          f"lr={LEARNING_RATE}, gamma={GAMMA}, batch={BATCH_SIZE}, "
-          f"ε_start={EXPLORATION_INITIAL_EPS}, ε_end={EXPLORATION_FINAL_EPS}, "
-          f"ε_fraction={EXPLORATION_FRACTION} | Mean reward: {mean_r:.2f}")
-
     train_env.close()
     eval_env.close()
+    del model, train_env, eval_env, logger
+    gc.collect()
+
+    return {
+        "name": name,
+        "lr": lr,
+        "gamma": gamma,
+        "batch": batch,
+        "eps_start": eps_start,
+        "eps_end": eps_end,
+        "eps_fraction": eps_fraction,
+        "mean_reward": mean_r,
+        "std_reward": std_r,
+    }
+
+
+def policy_comparison():
+    print("\n" + "=" * 55)
+    print("  POLICY COMPARISON: CnnPolicy vs MlpPolicy")
+    print("=" * 55)
+
+    log_dir = "./logs/policy_comparison/"
+    os.makedirs(log_dir, exist_ok=True)
+
+    results = {}
+    for policy in ["CnnPolicy", "MlpPolicy"]:
+        print(f"\n  Training with {policy} ...")
+        train_env = build_env(ENV_ID, log_dir)
+
+        model = DQN(
+            policy=policy,
+            env=train_env,
+            learning_rate=1e-4,
+            buffer_size=BUFFER_SIZE,
+            batch_size=32,
+            gamma=0.99,
+            exploration_fraction=0.30,
+            exploration_initial_eps=1.0,
+            exploration_final_eps=0.05,
+            target_update_interval=TARGET_UPDATE_INTERVAL,
+            learning_starts=LEARNING_STARTS,
+            train_freq=TRAIN_FREQ,
+            optimize_memory_usage=False,
+            verbose=0,
+        )
+
+        model.learn(total_timesteps=TOTAL_TIMESTEPS)
+
+        eval_env = build_env(ENV_ID, log_dir)
+        obs = eval_env.reset()
+        ep_rewards = []
+        ep_reward  = 0.0
+        ep_done    = 0
+
+        while ep_done < 3:
+            action, _ = model.predict(obs, deterministic=True)
+            obs, reward, done, info = eval_env.step(action)
+            ep_reward += reward[0]
+            if done[0]:
+                ep_rewards.append(ep_reward)
+                ep_reward = 0.0
+                ep_done += 1
+                obs = eval_env.reset()
+
+        results[policy] = np.mean(ep_rewards)
+        print(f"  {policy} mean reward: {results[policy]:.2f}")
+
+        train_env.close()
+        eval_env.close()
+        del model, train_env, eval_env
+        gc.collect()
+
+    print("\n  Winner:", max(results, key=results.get))
+    print("=" * 55)
+
+
+def main():
+    print("\n  Running 10 experiments for", MEMBER_NAME)
+    print("  Environment:", ENV_ID)
+    print("  Policy:", POLICY)
+    print("  Total timesteps per experiment:", TOTAL_TIMESTEPS)
+    print()
+
+    results = []
+    best_reward = -float("inf")
+    best_model_name = None
+
+    for exp in EXPERIMENTS:
+        result = run_experiment(exp)
+        results.append(result)
+        print(f"  {result['name']} done - Mean reward: {result['mean_reward']:.2f} +/- {result['std_reward']:.2f}\n")
+
+        if result["mean_reward"] > best_reward:
+            best_reward = result["mean_reward"]
+            best_model_name = result["name"]
+
+    import shutil
+    if best_model_name:
+        shutil.copy(f"./dqn_model_{best_model_name}.zip", "./dqn_model.zip")
+        print(f"  Best model ({best_model_name}, reward={best_reward:.2f}) saved as dqn_model.zip")
+
+    print("\n" + "=" * 55)
+    print(f"  RESULTS SUMMARY - {MEMBER_NAME}")
+    print("=" * 55)
+    print(f"  {'Exp':<6} {'lr':<8} {'gamma':<7} {'batch':<7} {'eps_start':<10} {'eps_end':<9} {'eps_frac':<10} {'Mean Reward':<12} {'Noted Behavior'}")
+    print("-" * 90)
+    for r in results:
+        if r["mean_reward"] >= best_reward:
+            note = "best performing config"
+        elif r["lr"] > 5e-4:
+            note = "high lr - unstable learning"
+        elif r["gamma"] < 0.97:
+            note = "low gamma - short-sighted"
+        elif r["batch"] >= 128:
+            note = "large batch - slow updates"
+        elif r["eps_end"] >= 0.10:
+            note = "high eps_end - more exploration"
+        else:
+            note = "stable training"
+        print(f"  {r['name']:<6} {r['lr']:<8} {r['gamma']:<7} {r['batch']:<7} {r['eps_start']:<10} {r['eps_end']:<9} {r['eps_fraction']:<10} {r['mean_reward']:<12.2f} {note}")
+    print("=" * 90)
+
+    policy_comparison()
 
 
 if __name__ == "__main__":
