@@ -123,6 +123,12 @@ Use this in your report/README submission notes:
 | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
 | exp10 | CnnPolicy | ... | ... | ... | ... | ... | ... | ... | ... |
 
+## Isaac Mugisha Experiment Results
+
+The experiment summary screenshot for Isaac Mugisha is stored in `docs/` and embedded below:
+
+![Isaac Mugisha Experiment Results](docs/isaac-mugisha-experiments.png)
+
 ## Logs, Models, and Artifacts
 
 Current workspace already contains:
