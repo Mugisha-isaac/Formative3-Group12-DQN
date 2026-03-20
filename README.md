@@ -1,85 +1,79 @@
-# Formative 3 - Deep Q Learning (Atari)
+# Formative 3: Deep Q Learning for Atari
 
-Professional project documentation for the ALU Formative 3 assignment using Stable Baselines3 + Gymnasium.
+This repository contains the implementation, training workflow, and evaluation artifacts for the ALU Formative 3 assignment on Deep Q-Networks (DQN).
 
-## Project Summary
+## Objective
 
-This project trains and evaluates a Deep Q-Network (DQN) agent on Atari environments.
-It contains:
+Build and evaluate a DQN agent using Stable Baselines3 and Gymnasium Atari environments, then analyze the impact of hyperparameter tuning and policy architecture choices.
 
-- `train.py`: trains a DQN policy, logs training metrics, saves checkpoints, and evaluates greedy policy performance.
-- `play.py`: loads a trained model and runs gameplay episodes with rendering for demonstration.
-- `train.ipynb`: notebook workflow version for iterative experimentation.
-- `logs_archive/`: archived logs from multiple experiments (`exp1` to `exp10`).
-- `models/`: archived trained models from experiments.
+## Repository Structure
 
-## Assignment Requirements Coverage
+- `train.py` - Trains the DQN agent, saves checkpoints and final model, and performs post-training evaluation.
+- `play.py` - Loads a trained model and runs rendered gameplay episodes using greedy action selection.
+- `train.ipynb` - Notebook-based workflow for interactive experimentation.
+- `logs_archive/` - Archived logs from experiment runs.
+- `models/` - Archived trained models.
+- `docs/` - Documentation assets (including experiment screenshot evidence).
 
-This repository is structured to satisfy the assignment tasks:
+## Assignment Alignment
 
-1. Define and train a DQN agent with Stable Baselines3.
-2. Compare policy architectures (`MlpPolicy` vs `CnnPolicy`).
-3. Tune hyperparameters across 10 experiments.
-4. Log reward trends and episode lengths.
-5. Save and replay the best model with greedy policy in `play.py`.
-6. Present results clearly (table + gameplay demo).
+This project addresses the required tasks:
 
-## Tech Stack
+1. Train a DQN agent in an Atari environment.
+2. Compare `MlpPolicy` and `CnnPolicy`.
+3. Execute and document 10 hyperparameter experiments.
+4. Track reward and episode-length behavior.
+5. Evaluate gameplay using a trained model with greedy policy.
+
+## Technology Stack
 
 - Python 3.10+
 - Stable Baselines3 (DQN)
-- Gymnasium Atari environments
-- ALE-Py + AutoROM
-- TensorBoard (for training metrics)
+- Gymnasium + Atari wrappers
+- ALE-Py and AutoROM
+- TensorBoard
 
-## Environment and Dependencies
+## Setup
 
-The scripts auto-install required packages at runtime. This is convenient for Colab, but local users can also pre-install dependencies:
+Install dependencies from the provided requirements file:
 
 ```powershell
-python -m pip install "numpy<2.0" "stable-baselines3[extra]>=2.3.0" "gymnasium[atari,accept-rom-license]>=0.29.0" "ale-py>=0.9.0" "shimmy[atari]>=0.2.1" "autorom[accept-rom-license]>=0.6.1" "tensorboard>=2.14.0"
+python -m pip install -r requirements.txt
 AutoROM --accept-license -q
 ```
 
-## How to Run
+Note: `train.py` and `play.py` currently include runtime package installation for convenience in notebook/Colab workflows.
 
-### 1) Train the agent
+## Run Instructions
+
+### Train
 
 ```powershell
 python train.py
 ```
 
-What `train.py` currently does:
+Current default training configuration in `train.py`:
 
-- Uses `ENV_ID = "ALE/Pong-v5"`
-- Uses `POLICY = "CnnPolicy"`
-- Trains for `500,000` timesteps
-- Saves model as `./dqn_model_exp1.zip` (based on `EXPERIMENT_NAME`)
-- Logs monitor/eval/checkpoint data under `./logs/<experiment_name>/`
-- Runs post-training greedy evaluation over 10 episodes and prints mean reward
+- Environment: `ALE/Pong-v5`
+- Policy: `CnnPolicy`
+- Timesteps: `500000`
+- Model output: `./dqn_model_exp1.zip` (derived from `EXPERIMENT_NAME`)
+- Logs: `./logs/<experiment_name>/`
 
-### 2) Play with a trained model
+### Play
 
 ```powershell
 python play.py
 ```
 
-What `play.py` currently expects:
+Ensure playback settings match training settings:
 
-- `MODEL_PATH = "./dqn_model.zip"`
-- `ENV_ID = "ALE/Breakout-v5"`
-- Renders gameplay for `N_EPISODES = 5`
+- `MODEL_PATH` must point to the model produced by training.
+- `ENV_ID` in `play.py` must match the environment used in `train.py`.
 
-Important: for successful playback, set `MODEL_PATH` and `ENV_ID` to match the model trained in `train.py`.
+## Hyperparameter Tuning Protocol
 
-Example alignment after training `exp1` on Pong:
-
-- `MODEL_PATH = "./dqn_model_exp1.zip"`
-- `ENV_ID = "ALE/Pong-v5"`
-
-## Hyperparameter Tuning Workflow (10 Experiments)
-
-The assignment requires 10 different hyperparameter combinations per member. In `train.py`, vary these values for each run:
+For each experiment, vary one or more of the following parameters in `train.py`:
 
 - `LEARNING_RATE`
 - `GAMMA`
@@ -90,30 +84,22 @@ The assignment requires 10 different hyperparameter combinations per member. In 
 
 Recommended process:
 
-1. Set `EXPERIMENT_NAME` (for example, `exp1`, `exp2`, ... `exp10`).
-2. Adjust one or more hyperparameters.
-3. Run `python train.py`.
-4. Record:
-   - mean reward
-   - reward trend shape
-   - episode length behavior
-   - stability/convergence observations
-5. Repeat for all 10 experiment configurations.
+1. Set a unique `EXPERIMENT_NAME`.
+2. Update hyperparameters.
+3. Run training.
+4. Record mean reward, episode behavior, and stability observations.
+5. Repeat until 10 configurations are completed.
 
-## Policy Comparison (MLP vs CNN)
+## Policy Comparison Guidance
 
-To compare policies as requested:
+To compare policy architectures fairly:
 
-- Keep the same environment and core hyperparameters.
-- Run once with `POLICY = "MlpPolicy"`.
-- Run once with `POLICY = "CnnPolicy"`.
-- Compare final mean reward, learning stability, and training speed.
+1. Keep environment and core hyperparameters constant.
+2. Run one experiment with `MlpPolicy`.
+3. Run one experiment with `CnnPolicy`.
+4. Compare reward level, convergence behavior, and training stability.
 
-Note: Atari image observations generally favor `CnnPolicy`.
-
-## Suggested Results Table Template
-
-Use this in your report/README submission notes:
+## Results Template
 
 | Experiment | Policy | lr | gamma | batch_size | eps_start | eps_end | eps_fraction | Mean Reward | Noted Behavior |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---|
@@ -123,51 +109,22 @@ Use this in your report/README submission notes:
 | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
 | exp10 | CnnPolicy | ... | ... | ... | ... | ... | ... | ... | ... |
 
-## Isaac Mugisha Experiment Results
+## Isaac Mugisha Experiment Evidence
 
-The experiment summary screenshot for Isaac Mugisha is stored in `docs/` and embedded below:
+The assignment experiment screenshot is stored in `docs/` and referenced below:
 
 ![Isaac Mugisha Experiment Results](docs/isaac-mugisha-experiments.png)
 
-## Logs, Models, and Artifacts
-
-Current workspace already contains:
-
-- `logs_archive/exp1` to `logs_archive/exp10`
-- `models/dqn_model_exp1` to `models/dqn_model_exp10`
-
-These archived artifacts are useful for:
-
-- performance comparison across experiments
-- selecting best model for final gameplay demo
-- backing up evidence for presentation and grading rubric
-
-## Presentation Checklist
-
-Before group presentation:
-
-- Confirm 10 hyperparameter experiments are documented.
-- Highlight which changes improved and harmed performance.
-- Explain best final configuration and why.
-- Run `play.py` using the best model in the same environment.
-- Prepare a short gameplay clip or live demo.
-
 ## Troubleshooting
 
-- ROM/license issues: rerun `AutoROM --accept-license -q`.
-- Mismatch errors in `play.py`: verify `MODEL_PATH` and `ENV_ID` match training settings.
-- Slow local training: reduce `TOTAL_TIMESTEPS` for quick tests, then restore for final runs.
-- Rendering issues on remote servers: use local machine or disable GUI and record metrics only.
+- ROM/license setup issues: run `AutoROM --accept-license -q`.
+- Model/environment mismatch in gameplay: verify `MODEL_PATH` and `ENV_ID` consistency.
+- Slow training on local hardware: reduce `TOTAL_TIMESTEPS` for quick validation runs.
+- Remote rendering limitations: run gameplay on a local machine with display support.
 
-## Authoring Notes
+## Submission Readiness Checklist
 
-- Assignment: Formative 3 - Deep Q Learning
-- Focus: decision quality, experiment clarity, and reproducible evaluation
-
----
-
-If you want, this README can be extended with:
-
-- exact best-experiment metrics from your archived logs
-- embedded reward plots
-- a short final "Best Configuration" executive summary section
+- 10 hyperparameter configurations completed and documented.
+- Policy comparison completed (`MlpPolicy` vs `CnnPolicy`).
+- Best-performing configuration identified and justified.
+- Gameplay demonstration prepared using best model.
