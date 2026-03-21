@@ -1,7 +1,9 @@
 import subprocess, sys
 
+
 def _install(pkg):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", pkg])
+
 
 _install("numpy<2.0")
 _install("stable-baselines3[extra]>=2.3.0")
@@ -22,7 +24,11 @@ import ale_py
 import gymnasium as gym
 from stable_baselines3 import DQN
 from stable_baselines3.common.atari_wrappers import AtariWrapper
-from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv, VecTransposeImage
+from stable_baselines3.common.vec_env import (
+    VecFrameStack,
+    DummyVecEnv,
+    VecTransposeImage,
+)
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback
 
@@ -32,26 +38,106 @@ warnings.filterwarnings("ignore", category=UserWarning)
 MEMBER_NAME = "Isaac MUGISHA"
 
 EXPERIMENTS = [
-    {"name": "exp1",  "lr": 1e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
-    {"name": "exp2",  "lr": 5e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
-    {"name": "exp3",  "lr": 1e-3,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
-    {"name": "exp4",  "lr": 1e-4,  "gamma": 0.95,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
-    {"name": "exp5",  "lr": 1e-4,  "gamma": 0.999, "batch": 32,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
-    {"name": "exp6",  "lr": 1e-4,  "gamma": 0.99,  "batch": 64,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
-    {"name": "exp7",  "lr": 1e-4,  "gamma": 0.99,  "batch": 128, "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.30},
-    {"name": "exp8",  "lr": 1e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 1.0, "eps_end": 0.10, "eps_fraction": 0.50},
-    {"name": "exp9",  "lr": 2e-4,  "gamma": 0.98,  "batch": 64,  "eps_start": 1.0, "eps_end": 0.05, "eps_fraction": 0.40},
-    {"name": "exp10", "lr": 3e-4,  "gamma": 0.99,  "batch": 32,  "eps_start": 0.8, "eps_end": 0.05, "eps_fraction": 0.30},
+    {
+        "name": "exp1",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp2",
+        "lr": 5e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp3",
+        "lr": 1e-3,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp4",
+        "lr": 1e-4,
+        "gamma": 0.95,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp5",
+        "lr": 1e-4,
+        "gamma": 0.999,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp6",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 64,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp7",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 128,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp8",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.10,
+        "eps_fraction": 0.50,
+    },
+    {
+        "name": "exp9",
+        "lr": 2e-4,
+        "gamma": 0.98,
+        "batch": 64,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.40,
+    },
+    {
+        "name": "exp10",
+        "lr": 3e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 0.8,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
 ]
 
-ENV_ID                 = "ALE/Breakout-v5"
-POLICY                 = "CnnPolicy"
-TOTAL_TIMESTEPS        = 50_000
-N_STACK                = 4
-BUFFER_SIZE            = 5_000
+ENV_ID = "ALE/Breakout-v5"
+POLICY = "CnnPolicy"
+TOTAL_TIMESTEPS = 50_000
+N_STACK = 4
+BUFFER_SIZE = 5_000
 TARGET_UPDATE_INTERVAL = 500
-LEARNING_STARTS        = 2_000
-TRAIN_FREQ             = 4
+LEARNING_STARTS = 2_000
+TRAIN_FREQ = 4
 
 
 class RewardLengthLogger(BaseCallback):
@@ -87,7 +173,9 @@ def make_env(env_id, log_dir):
         env = AtariWrapper(env)
         env = Monitor(env, log_dir)
         return env
+
     return _init
+
 
 def build_env(env_id, log_dir):
     env = DummyVecEnv([make_env(env_id, log_dir)])
@@ -97,14 +185,14 @@ def build_env(env_id, log_dir):
 
 
 def run_experiment(exp):
-    name         = exp["name"]
-    lr           = exp["lr"]
-    gamma        = exp["gamma"]
-    batch        = exp["batch"]
-    eps_start    = exp["eps_start"]
-    eps_end      = exp["eps_end"]
+    name = exp["name"]
+    lr = exp["lr"]
+    gamma = exp["gamma"]
+    batch = exp["batch"]
+    eps_start = exp["eps_start"]
+    eps_end = exp["eps_end"]
     eps_fraction = exp["eps_fraction"]
-    log_dir      = f"./logs/{name}/"
+    log_dir = f"../results/logs/{name}/"
     os.makedirs(log_dir, exist_ok=True)
 
     print("=" * 55)
@@ -144,20 +232,24 @@ def run_experiment(exp):
     logger.save_log()
 
     if logger.episode_rewards:
-        print(f"  Reward trend  - first episode: {logger.episode_rewards[0]:.1f}  |  last episode: {logger.episode_rewards[-1]:.1f}")
-        print(f"  Length trend  - first episode: {logger.episode_lengths[0]}  |  last episode: {logger.episode_lengths[-1]}")
+        print(
+            f"  Reward trend  - first episode: {logger.episode_rewards[0]:.1f}  |  last episode: {logger.episode_rewards[-1]:.1f}"
+        )
+        print(
+            f"  Length trend  - first episode: {logger.episode_lengths[0]}  |  last episode: {logger.episode_lengths[-1]}"
+        )
 
-    model.save(f"./dqn_model_{name}")
+    model.save(f"../results/models/dqn_model_{name}")
 
     if name == "exp1":
-        model.save("./dqn_model")
+        model.save("../results/models/dqn_model")
         print("  Best model also saved as dqn_model.zip")
 
     eval_env = build_env(ENV_ID, log_dir)
     obs = eval_env.reset()
     episode_rewards = []
-    episode_reward  = 0.0
-    episodes_done   = 0
+    episode_reward = 0.0
+    episodes_done = 0
 
     while episodes_done < 3:
         action, _ = model.predict(obs, deterministic=True)
@@ -170,7 +262,7 @@ def run_experiment(exp):
             obs = eval_env.reset()
 
     mean_r = np.mean(episode_rewards)
-    std_r  = np.std(episode_rewards)
+    std_r = np.std(episode_rewards)
 
     train_env.close()
     eval_env.close()
@@ -195,7 +287,7 @@ def policy_comparison():
     print("  POLICY COMPARISON: CnnPolicy vs MlpPolicy")
     print("=" * 55)
 
-    log_dir = "./logs/policy_comparison/"
+    log_dir = "../results/logs/policy_comparison/"
     os.makedirs(log_dir, exist_ok=True)
 
     results = {}
@@ -225,8 +317,8 @@ def policy_comparison():
         eval_env = build_env(ENV_ID, log_dir)
         obs = eval_env.reset()
         ep_rewards = []
-        ep_reward  = 0.0
-        ep_done    = 0
+        ep_reward = 0.0
+        ep_done = 0
 
         while ep_done < 3:
             action, _ = model.predict(obs, deterministic=True)
@@ -264,21 +356,31 @@ def main():
     for exp in EXPERIMENTS:
         result = run_experiment(exp)
         results.append(result)
-        print(f"  {result['name']} done - Mean reward: {result['mean_reward']:.2f} +/- {result['std_reward']:.2f}\n")
+        print(
+            f"  {result['name']} done - Mean reward: {result['mean_reward']:.2f} +/- {result['std_reward']:.2f}\n"
+        )
 
         if result["mean_reward"] > best_reward:
             best_reward = result["mean_reward"]
             best_model_name = result["name"]
 
     import shutil
+
     if best_model_name:
-        shutil.copy(f"./dqn_model_{best_model_name}.zip", "./dqn_model.zip")
-        print(f"  Best model ({best_model_name}, reward={best_reward:.2f}) saved as dqn_model.zip")
+        shutil.copy(
+            f"../results/models/dqn_model_{best_model_name}.zip",
+            "../results/models/dqn_model.zip",
+        )
+        print(
+            f"  Best model ({best_model_name}, reward={best_reward:.2f}) saved as dqn_model.zip"
+        )
 
     print("\n" + "=" * 55)
     print(f"  RESULTS SUMMARY - {MEMBER_NAME}")
     print("=" * 55)
-    print(f"  {'Exp':<6} {'lr':<8} {'gamma':<7} {'batch':<7} {'eps_start':<10} {'eps_end':<9} {'eps_frac':<10} {'Mean Reward':<12} {'Noted Behavior'}")
+    print(
+        f"  {'Exp':<6} {'lr':<8} {'gamma':<7} {'batch':<7} {'eps_start':<10} {'eps_end':<9} {'eps_frac':<10} {'Mean Reward':<12} {'Noted Behavior'}"
+    )
     print("-" * 90)
     for r in results:
         if r["mean_reward"] >= best_reward:
@@ -293,7 +395,9 @@ def main():
             note = "high eps_end - more exploration"
         else:
             note = "stable training"
-        print(f"  {r['name']:<6} {r['lr']:<8} {r['gamma']:<7} {r['batch']:<7} {r['eps_start']:<10} {r['eps_end']:<9} {r['eps_fraction']:<10} {r['mean_reward']:<12.2f} {note}")
+        print(
+            f"  {r['name']:<6} {r['lr']:<8} {r['gamma']:<7} {r['batch']:<7} {r['eps_start']:<10} {r['eps_end']:<9} {r['eps_fraction']:<10} {r['mean_reward']:<12.2f} {note}"
+        )
     print("=" * 90)
 
     policy_comparison()

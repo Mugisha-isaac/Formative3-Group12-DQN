@@ -8,13 +8,29 @@ Build and evaluate a DQN agent using Stable Baselines3 and Gymnasium Atari envir
 
 ## Repository Structure
 
-- `train.py` - Trains the DQN agent, saves checkpoints and final model, and performs post-training evaluation.
-- `play.py` - Loads a trained model and runs rendered gameplay episodes using greedy action selection.
-- `train.ipynb` - Notebook-based workflow that runs 10 hyperparameter experiments, compares CnnPolicy vs MlpPolicy, and generates a comprehensive results summary table.
-- `play.ipynb` - Interactive notebook for downloading and testing the trained model, displaying episode-by-episode gameplay results and performance statistics.
-- `logs_archive/` - Archived logs from experiment runs.
-- `models/` - Archived trained models.
-- `docs/` - Documentation assets (including experiment screenshot evidence).
+```
+.
+├── src/
+│   ├── train.py              # DQN training script with checkpoints & evaluation
+│   └── play.py               # Model inference & rendered gameplay
+├── notebooks/
+│   ├── train.ipynb           # Hyperparameter experiments (10 configs) & policy comparison
+│   └── play.ipynb            # Interactive model testing & gameplay visualization
+├── docs/
+│   ├── experiments.png       # Training results & hyperparameter comparison table
+│   ├── policy-comparison.png # CnnPolicy vs MlpPolicy performance comparison
+│   ├── play-outcome.png      # Training summary & final metrics
+│   └── gameplay/
+│       ├── game-1.png        # Trained agent gameplay screenshot 1
+│       ├── game-2.png        # Trained agent gameplay screenshot 2
+│       └── game-3.png        # Trained agent gameplay screenshot 3
+├── results/
+│   ├── logs/                 # Experiment logs & TensorBoard events
+│   └── models/               # Trained model checkpoints
+├── requirements.txt          # Python dependencies
+├── README.md                 # This file
+└── .venv/                    # Virtual environment
+```
 
 ## Assignment Alignment
 
@@ -50,31 +66,31 @@ Note: `train.py` and `play.py` currently include runtime package installation fo
 ### Train
 
 ```powershell
-python train.py
+python src/train.py
 ```
 
-Current default training configuration in `train.py`:
+Current default training configuration in `src/train.py`:
 
 - Environment: `ALE/Pong-v5`
 - Policy: `CnnPolicy`
 - Timesteps: `500000`
-- Model output: `./dqn_model_exp1.zip` (derived from `EXPERIMENT_NAME`)
-- Logs: `./logs/<experiment_name>/`
+- Model output: `./results/models/dqn_model_exp1.zip` (derived from `EXPERIMENT_NAME`)
+- Logs: `./results/logs/<experiment_name>/`
 
 ### Play
 
 ```powershell
-python play.py
+python src/play.py
 ```
 
 Ensure playback settings match training settings:
 
 - `MODEL_PATH` must point to the model produced by training.
-- `ENV_ID` in `play.py` must match the environment used in `train.py`.
+- `ENV_ID` in `src/play.py` must match the environment used in `src/train.py`.
 
 ## Hyperparameter Tuning Protocol
 
-For each experiment, vary one or more of the following parameters in `train.py`:
+For each experiment, vary one or more of the following parameters in `src/train.py`:
 
 - `LEARNING_RATE`
 - `GAMMA`
@@ -86,7 +102,7 @@ For each experiment, vary one or more of the following parameters in `train.py`:
 Recommended process:
 
 1. Set a unique `EXPERIMENT_NAME`.
-2. Update hyperparameters.
+2. Update hyperparameters in `src/train.py`.
 3. Run training.
 4. Record mean reward, episode behavior, and stability observations.
 5. Repeat until 10 configurations are completed.
@@ -98,6 +114,34 @@ To compare policy architectures fairly:
 1. Keep environment and core hyperparameters constant.
 2. Run one experiment with `MlpPolicy`.
 3. Run one experiment with `CnnPolicy`.
+
+## Results & Evidence
+
+### Training & Hyperparameter Experiments
+
+Comprehensive results from 10 hyperparameter configurations:
+
+![Experiments Summary](docs/experiments.png)
+
+### Policy Architecture Comparison
+
+Performance comparison between CnnPolicy and MlpPolicy architectures:
+
+![Policy Comparison](docs/policy-comparison.png)
+
+### Training Summary
+
+Final training metrics and model performance:
+
+![Play Outcome](docs/play-outcome.png)
+
+### Trained Agent Gameplay
+
+Screenshots demonstrating the trained DQN agent playing Pong with greedy action selection:
+
+| Game 1 | Game 2 | Game 3 |
+|--------|--------|--------|
+| ![Game 1](docs/gameplay/game-1.png) | ![Game 2](docs/gameplay/game-2.png) | ![Game 3](docs/gameplay/game-3.png) |
 4. Compare reward level, convergence behavior, and training stability.
 
 ## Results Template
