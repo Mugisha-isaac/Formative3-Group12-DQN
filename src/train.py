@@ -1,19 +1,7 @@
-import subprocess, sys
+"""Run 10 DQN hyperparameter experiments and save the best model artifact.
 
-
-def _install(pkg):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", pkg])
-
-
-_install("numpy<2.0")
-_install("stable-baselines3[extra]>=2.3.0")
-_install("gymnasium[atari,accept-rom-license]>=0.29.0")
-_install("ale-py>=0.9.0")
-_install("shimmy[atari]>=0.2.1")
-_install("autorom[accept-rom-license]>=0.6.1")
-_install("tensorboard>=2.14.0")
-
-subprocess.call(["AutoROM", "--accept-license", "-q"])
+Dependencies should be installed once via requirements.txt before running this file.
+"""
 
 import os
 import gc
@@ -35,7 +23,7 @@ from stable_baselines3.common.callbacks import BaseCallback
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
-MEMBER_NAME = "Isaac MUGISHA"
+MEMBER_NAME = os.getenv("MEMBER_NAME", "Gikundiro Liliane")
 
 EXPERIMENTS = [
     {
@@ -132,12 +120,13 @@ EXPERIMENTS = [
 
 ENV_ID = "ALE/Breakout-v5"
 POLICY = "CnnPolicy"
-TOTAL_TIMESTEPS = 50_000
+TOTAL_TIMESTEPS = int(os.getenv("TOTAL_TIMESTEPS", "5000"))
 N_STACK = 4
 BUFFER_SIZE = 5_000
 TARGET_UPDATE_INTERVAL = 500
 LEARNING_STARTS = 2_000
 TRAIN_FREQ = 4
+RUN_POLICY_COMPARISON  = os.getenv("RUN_POLICY_COMPARISON", "0") == "1"
 
 
 class RewardLengthLogger(BaseCallback):
@@ -240,10 +229,6 @@ def run_experiment(exp):
         )
 
     model.save(f"../results/models/dqn_model_{name}")
-
-    if name == "exp1":
-        model.save("../results/models/dqn_model")
-        print("  Best model also saved as dqn_model.zip")
 
     eval_env = build_env(ENV_ID, log_dir)
     obs = eval_env.reset()
@@ -367,12 +352,11 @@ def main():
     import shutil
 
     if best_model_name:
-        shutil.copy(
-            f"../results/models/dqn_model_{best_model_name}.zip",
-            "../results/models/dqn_model.zip",
-        )
+        best_src = f"../results/models/dqn_model_{best_model_name}.zip"
+        best_dst = "../results/models/dqn_model.zip"
+        shutil.copy(best_src, best_dst)
         print(
-            f"  Best model ({best_model_name}, reward={best_reward:.2f}) saved as dqn_model.zip"
+            f"  Best model ({best_model_name}, reward={best_reward:.2f}) saved as ../results/models/dqn_model.zip"
         )
 
     print("\n" + "=" * 55)
@@ -400,7 +384,8 @@ def main():
         )
     print("=" * 90)
 
-    policy_comparison()
+    if RUN_POLICY_COMPARISON:
+        policy_comparison()
 
 
 if __name__ == "__main__":
