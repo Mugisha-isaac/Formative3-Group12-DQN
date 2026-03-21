@@ -1,6 +1,7 @@
 ale-py>=0.9.0
 autorom[accept-rom-license]>=0.6.1
 gymnasium[atari,accept-rom-license]>=0.29.0
-numpy<2.0
 shimmy[atari]>=0.2.1
 stable-baselines3[extra]>=2.7.0
+numpy>=2.1
+opencv-python>=4.8.0
