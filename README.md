@@ -144,9 +144,9 @@ Screenshots demonstrating the trained DQN agent playing Pong with greedy action 
 | ![Game 1](docs/gameplay/game-1.png) | ![Game 2](docs/gameplay/game-2.png) | ![Game 3](docs/gameplay/game-3.png) |
 4. Compare reward level, convergence behavior, and training stability.
 
-## Gikundiro Liliane - Hyperparameter Tuning Deep Dive
+## Hyperparameter Tuning Deep Dive
 
-This section captures Liliane's required contribution for the 10 hyperparameter experiments using the shared `train.py`, with a focus on `lr`, `gamma`, and `batch_size`.
+This section captures the 10 hyperparameter experiments using the shared `train.py`, with a focus on `lr`, `gamma`, and `batch_size`.
 
 ### Experiment Table (10 Rows)
 
