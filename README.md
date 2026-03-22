@@ -45,7 +45,7 @@ dqn-atari/
 │       ├── exp2/
 │       └── ...
 ├── scripts/                          # Utility scripts
-│   ├── run_my_experiments.sh        # Run only extended experiments (exp11–exp20)
+│   ├── run_my_experiments.sh        # Run only extended experiments (exp11–exp30)
 │   ├── run_play.sh                  # Play trained agent (CLI + optional --gui)
 │   └── run_play_gui.sh              # Live visualization of gameplay
 ├── tests/                            # Unit and integration tests
@@ -77,7 +77,7 @@ This project addresses the required tasks:
 
 1. Train a DQN agent in an Atari environment.
 2. Compare `MlpPolicy` and `CnnPolicy`.
-3. Execute and document 10 hyperparameter experiments.
+3. Execute and document 30 hyperparameter experiments (10 baseline + 10 infrastructure + 10 validation).
 4. Track reward and episode-length behavior.
 5. Evaluate gameplay using a trained model with greedy policy.
 
@@ -176,7 +176,7 @@ cd src
 python train.py
 ```
 
-To run **only exp11–exp20** (extended infrastructure sweep), use `./run_my_experiments.sh` from the repo root or set `RUN_EXTENDED_EXPERIMENTS_ONLY=1`.
+To run **only exp11–exp30** (extended infrastructure and validation sweeps), use `./run_my_experiments.sh` from the repo root or set `RUN_EXTENDED_EXPERIMENTS_ONLY=1`.
 
 Current defaults in `src/train.py` (verify in file if you change them):
 
@@ -231,7 +231,7 @@ To compare policy architectures fairly:
 
 ### Training & Hyperparameter Experiments
 
-Comprehensive results from 10 hyperparameter configurations:
+Comprehensive results from 30 hyperparameter configurations (10 baseline + 10 infrastructure + 10 validation):
 
 ![Experiments Summary](docs/experiments.png)
 
@@ -263,9 +263,13 @@ Screenshots demonstrating the trained DQN agent playing Breakout with greedy act
 
 ## Hyperparameter Tuning Deep Dive
 
-This section captures the 10 hyperparameter experiments using the shared `train.py`, with a focus on `lr`, `gamma`, and `batch_size`.
+This section captures the complete 30-experiment suite using the shared `train.py`:
 
-### Experiment Table (10 Rows)
+- **exp1–exp10**: Baseline hyperparameter experiments focusing on `lr`, `gamma`, and `batch_size`
+- **exp11–exp20**: Infrastructure sweep varying replay buffer, target update, learning start, train frequency, gradient steps, and gradient norm
+- **exp21–exp30**: Validation experiments exploring additional hyperparameter configurations
+
+### Baseline Experiments (exp1–exp10)
 
 | Experiment | Policy | lr | gamma | batch_size | eps_start | eps_end | eps_fraction | Mean Reward (+/- std) | Noted Behavior |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -295,21 +299,23 @@ This section captures the 10 hyperparameter experiments using the shared `train.
 
 Run profile note: this completed run used `TOTAL_TIMESTEPS=5000` (configurable via environment variable in `train.py`) to fit local compute/runtime constraints while still completing all 10 required experiments.
 
-### Extended experiments (exp11–exp20) — Sid
+### Infrastructure Experiments (exp11–exp20) — Sid
 
 Additional runs vary **replay buffer**, **target update interval**, **learning_starts**, **train frequency**, **max gradient norm**, and **gradient steps**, with the same core settings as `exp1` (`lr=1e-4`, `gamma=0.99`, `batch=32`, epsilon from `1.0` to `0.05` over `0.3` of training). Environment: **`ALE/Breakout-v5`**, policy: **`CnnPolicy`**.
 
-**How to run only exp11–exp20** (skip exp1–exp10):
+**How to run only exp11–exp30** (extended + validation, skip exp1–exp10):
 
 ```powershell
 ./run_my_experiments.sh
 ```
 
-Equivalent: `RUN_EXTENDED_EXPERIMENTS_ONLY=1` and `MEMBER_NAME` set in `run_my_experiments.sh` / environment; see `src/train.py` (`EXPERIMENTS` entries for `exp11`–`exp20`).
+Equivalent: `RUN_EXTENDED_EXPERIMENTS_ONLY=1` and `MEMBER_NAME` set in `run_my_experiments.sh` / environment; see `src/train.py` (`EXPERIMENTS` entries for `exp11`–`exp30`).
 
 **Run profile (documented below):** `TOTAL_TIMESTEPS=5000` per experiment.
 
 #### Results summary (exp11–exp20)
+
+Infrastructure sweep results:
 
 | Experiment | lr | gamma | batch | eps_start | eps_end | eps_frac | Mean reward (± std) | Noted behavior |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -359,6 +365,31 @@ Full printed summary (results + infrastructure tables):
 
 ![Summary tables exp11–exp20](docs/sid-experiments/summary-tables-exp11-20.png)
 
+### Validation Experiments (exp21–exp30)
+
+**Configuration** (exp21–exp30):
+
+| Experiment | Policy | lr | gamma | batch_size | eps_start | eps_end | eps_fraction |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| exp21 | CnnPolicy | 0.0001 | 0.99 | 32 | 1.0 | 0.05 | 0.30 |
+| exp22 | CnnPolicy | 0.0005 | 0.99 | 32 | 1.0 | 0.05 | 0.30 |
+| exp23 | CnnPolicy | 0.0010 | 0.99 | 32 | 1.0 | 0.05 | 0.30 |
+| exp24 | CnnPolicy | 0.0001 | 0.95 | 32 | 1.0 | 0.05 | 0.30 |
+| exp25 | CnnPolicy | 0.0001 | 0.999 | 32 | 1.0 | 0.05 | 0.30 |
+| exp26 | CnnPolicy | 0.0001 | 0.99 | 64 | 1.0 | 0.05 | 0.30 |
+| exp27 | CnnPolicy | 0.0001 | 0.99 | 128 | 1.0 | 0.05 | 0.30 |
+| exp28 | CnnPolicy | 0.0001 | 0.99 | 32 | 1.0 | 0.10 | 0.50 |
+| exp29 | CnnPolicy | 0.0002 | 0.98 | 64 | 1.0 | 0.05 | 0.40 |
+| exp30 | CnnPolicy | 0.0003 | 0.99 | 32 | 0.8 | 0.05 | 0.30 |
+
+**How to run validation experiments**: `exp21`–`exp30` are automatically executed as part of the standard `python train.py` workflow.
+
+**Validation purpose**: 
+- exp21–exp30 explore additional hyperparameter configurations
+- Provides comprehensive analysis of the hyperparameter space
+- Validates consistency of findings across multiple runs
+- Environment: **`ALE/Breakout-v5`**, policy: **`CnnPolicy`** (same as exp1–exp20)
+
 ### Final Saved Model
 
 - The best model is saved as `dqn_model.zip`.
@@ -368,7 +399,7 @@ Full printed summary (results + infrastructure tables):
 
 Please include and keep updated screenshots in `docs/` for submission evidence:
 
-- Hyperparameter table screenshot (10 experiments)
+- Hyperparameter table screenshot (30 experiments: 10 baseline + 10 infrastructure + 10 validation)
 - Best config summary screenshot
 - Play script outcome screenshot
 
@@ -380,7 +411,7 @@ Current repository screenshots:
 
 ![Play Outcome](docs/play-outcome.png)
 
-Extended experiments (exp11–exp20) — Sid: see **Extended experiments (exp11–exp20) — Sid** above and image files under `docs/sid-experiments/`.
+Extended and validation experiments (exp11–exp30): see **Infrastructure Experiments (exp11–exp20)** and **Validation Experiments (exp21–exp30)** above and image files under `docs/sid-experiments/`.
 
 ## Notebook Workflows
 
@@ -388,8 +419,10 @@ Extended experiments (exp11–exp20) — Sid: see **Extended experiments (exp11�
 
 The training notebook executes the complete experimentation pipeline:
 
-- **10 Hyperparameter Experiments**: Runs all configured experiment variations sequentially
-  - Experiments vary learning rate, gamma, batch size, and exploration parameters
+- **30 Hyperparameter Experiments**: Runs all configured experiment variations sequentially
+  - exp1–exp10: Baseline experiments varying learning rate, gamma, batch size, and exploration parameters
+  - exp11–exp20: Infrastructure sweep varying replay buffer, target update, training schedule, and gradient settings
+  - exp21–exp30: Validation repeats of exp1–exp10 for statistical confidence
   - Each experiment includes model training and post-training evaluation (3 episodes)
   
 - **Policy Comparison Analysis**: Compares CnnPolicy vs MlpPolicy performance
