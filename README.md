@@ -251,9 +251,18 @@ Final training metrics and model performance:
 
 **Gameplay Video:**
 
-
-
 https://github.com/user-attachments/assets/5e176c59-d75a-4596-9f92-7a2715137ea2
+
+
+https://github.com/user-attachments/assets/6b547859-db61-48af-a921-80f0a2edada2
+
+
+
+https://github.com/user-attachments/assets/d0aad582-45b8-4203-b61d-f3dd1c5a10ea
+
+
+
+
 
 
 
