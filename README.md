@@ -85,7 +85,7 @@ This project addresses the required tasks:
 
 This is a collaborative group project with clear role divisions and shared responsibilities. All three team members have contributed equally to the implementation and will present together.
 
-### Ange Constance — Environment Setup & Training Foundation
+### Isaac MUGISHA — Environment Setup & Training Foundation
 
 **Completed Work:**
 - Selected the Atari (Breakout) environment and justified the choice for DQN learning
@@ -123,7 +123,7 @@ This is a collaborative group project with clear role divisions and shared respo
 - Summary of insights on best configurations and trade-offs  
 - Final `dqn_model.zip` (best model selected from exp15)  
 
-### Isaac Mugisha — Evaluation & Presentation Lead
+### Ange Constance — Evaluation & Presentation Lead
 
 **Completed Work:**
 - Wrote `play.py` for model inference and gameplay visualization with greedy policy
