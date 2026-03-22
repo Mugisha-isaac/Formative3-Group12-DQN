@@ -251,10 +251,11 @@ Final training metrics and model performance:
 
 **Gameplay Video:**
 
-<video width="640" height="480" controls>
-  <source src="docs/gameplay/WhatsApp%20Video%202026-03-21%20at%2022.00.38.mp4" type="video/mp4">
-  Your browser does not support the video tag. [Download video](docs/gameplay/WhatsApp%20Video%202026-03-21%20at%2022.00.38.mp4)
-</video>
+
+
+https://github.com/user-attachments/assets/5e176c59-d75a-4596-9f92-7a2715137ea2
+
+
 
 **Gameplay Screenshots:**
 
