@@ -9,36 +9,67 @@ Build and evaluate a DQN agent using Stable Baselines3 and Gymnasium Atari envir
 ## Repository Structure
 
 ```
-.
-├── src/
-│   ├── train.py              # DQN training script with checkpoints & evaluation
-│   └── play.py               # Model inference & rendered gameplay
-├── notebooks/
-│   ├── train.ipynb           # Hyperparameter experiments (10 configs) & policy comparison
-│   └── play.ipynb            # Interactive model testing & gameplay visualization
-├── docs/
-│   ├── experiments.png       # Training results & hyperparameter comparison table
-│   ├── policy-comparison.png # CnnPolicy vs MlpPolicy performance comparison
-│   ├── play-outcome.png      # Training summary & final metrics
-│   ├── sid-experiments/      # Screenshots: extended runs exp11–exp20 (Sid)
+dqn-atari/
+├── src/                              # Source code
+│   ├── __init__.py                  # Package initialization
+│   ├── train.py                     # DQN training script with checkpoints & evaluation
+│   └── play.py                      # Model inference & rendered gameplay
+├── notebooks/                        # Jupyter notebooks
+│   ├── train.ipynb                  # Hyperparameter experiments (10 configs) & policy comparison
+│   └── play.ipynb                   # Interactive model testing & gameplay visualization
+├── config/                           # Configuration files
+│   ├── config.example.yaml          # Example configuration template
+│   └── README.md                    # Configuration documentation
+├── docs/                             # Documentation & results
+│   ├── experiments.png              # Training results & hyperparameter comparison table
+│   ├── policy-comparison.png        # CnnPolicy vs MlpPolicy performance comparison
+│   ├── play-outcome.png             # Training summary & final metrics
+│   ├── sid-experiments/             # Extended experiments results (exp11-exp20)
 │   │   ├── terminal-run-header-exp11-12.png
 │   │   ├── terminal-exp14-17.png
 │   │   ├── terminal-exp18-20-best.png
 │   │   └── summary-tables-exp11-20.png
-│   └── gameplay/
-│       ├── game-1.png        # Trained agent gameplay screenshot 1
-│       ├── game-2.png        # Trained agent gameplay screenshot 2
-│       └── game-3.png        # Trained agent gameplay screenshot 3
-├── run_my_experiments.sh     # Run only exp11–exp20 (see Extended experiments)
-├── run_play.sh               # Play trained agent (CLI + optional --gui)
-├── run_play_gui.sh           # Same as run_play.sh --gui (live window)
-├── results/
-│   ├── logs/                 # Experiment logs & TensorBoard events
-│   └── models/               # Trained model checkpoints
-├── requirements.txt          # Python dependencies
-├── README.md                 # This file
-└── .venv/                    # Virtual environment
+│   └── gameplay/                    # Gameplay media
+│       ├── game-1.png               # Trained agent gameplay screenshot 1
+│       ├── game-2.png               # Trained agent gameplay screenshot 2
+│       ├── game-3.png               # Trained agent gameplay screenshot 3
+│       └── WhatsApp Video 2026-03-21 at 22.00.38.mp4  # Gameplay video
+├── results/                          # Training results & models
+│   ├── models/                      # Trained DQN model checkpoints
+│   │   ├── dqn_model.zip           # Best performing model
+│   │   ├── dqn_model_exp1.zip      # Experiment-specific models
+│   │   ├── dqn_model_exp2.zip
+│   │   └── ...
+│   └── logs/                        # Training logs & TensorBoard events
+│       ├── exp1/                    # Per-experiment logs
+│       ├── exp2/
+│       └── ...
+├── scripts/                          # Utility scripts
+│   ├── run_my_experiments.sh        # Run only extended experiments (exp11–exp20)
+│   ├── run_play.sh                  # Play trained agent (CLI + optional --gui)
+│   └── run_play_gui.sh              # Live visualization of gameplay
+├── tests/                            # Unit and integration tests
+│   ├── __init__.py
+│   └── test_example.py              # Example test file
+├── requirements.txt                  # Python dependencies
+├── pyproject.toml                   # Modern Python project configuration
+├── setup.py                         # Package setup configuration
+├── LICENSE                          # MIT License
+├── CONTRIBUTING.md                  # Contribution guidelines
+└── README.md                        # This file
 ```
+
+### Directory Descriptions
+
+| Directory | Purpose |
+| --- | --- |
+| `src/` | Core Python modules for training and inference |
+| `notebooks/` | Jupyter notebooks for interactive experimentation |
+| `config/` | Configuration files and templates |
+| `docs/` | Documentation, results, and visual assets |
+| `results/` | Training outputs, models, and logs (git-ignored) |
+| `scripts/` | Executable scripts for common tasks |
+| `tests/` | Unit tests and test utilities |
 
 ## Assignment Alignment
 
@@ -52,20 +83,85 @@ This project addresses the required tasks:
 
 ## Technology Stack
 
-- Python 3.10+
+- **Python 3.10 - 3.13** (Required for Atari support via ale_py)
+  - Python 3.14+ is not currently supported due to ale_py compatibility
 - Stable Baselines3 (DQN)
 - Gymnasium + Atari wrappers
 - ALE-Py and AutoROM
-- TensorBoard
+- TensorBoard, PyTorch, NumPy, Pandas
 
-## Setup
+## Quick Start
 
-Install dependencies from the provided requirements file:
+### 1. Clone and Setup
 
 ```powershell
-python -m pip install -r requirements.txt
-AutoROM --accept-license -q
+# Clone the repository
+git clone https://github.com/Mugisha-isaac/Formative3-Group12-DQN.git
+cd Formative3-Group12-DQN
+
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+python -m AutoROM --accept-license -q
 ```
+
+### 2. Train a Model
+
+```powershell
+cd src
+python train.py
+```
+
+Your trained model will be saved to `../results/models/dqn_model.zip`
+
+### 3. Watch Your Agent Play
+
+```powershell
+python play.py --gui
+```
+
+## Installation
+
+### Requirements
+
+- **Python 3.10, 3.11, 3.12, or 3.13**
+- Windows, macOS, or Linux
+- 4GB+ RAM recommended
+- CUDA-capable GPU (optional, speeds up training)
+
+### Step-by-Step Setup
+
+1. **Clone repository**:
+   ```powershell
+   git clone https://github.com/Mugisha-isaac/Formative3-Group12-DQN.git
+   cd Formative3-Group12-DQN
+   ```
+
+2. **Create virtual environment**:
+   ```powershell
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+
+3. **Install Python dependencies**:
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+4. **Setup Atari ROMs**:
+   ```powershell
+   python -m AutoROM --accept-license -q
+   ```
+
+5. **Verify installation**:
+   ```powershell
+   python -c "import gymnasium; import stable_baselines3; print('Installation successful')"
+   ```
+
+## Setup
 
 Note: Install dependencies once with `requirements.txt` before running `train.py` or `play.py`.
 
@@ -153,13 +249,20 @@ Final training metrics and model performance:
 
 ### Trained Agent Gameplay
 
-Screenshots demonstrating the trained DQN agent playing Pong with greedy action selection:
+**Gameplay Video:**
+
+<video width="640" height="480" controls>
+  <source src="docs/gameplay/WhatsApp%20Video%202026-03-21%20at%2022.00.38.mp4" type="video/mp4">
+  Your browser does not support the video tag. [Download video](docs/gameplay/WhatsApp%20Video%202026-03-21%20at%2022.00.38.mp4)
+</video>
+
+**Gameplay Screenshots:**
+
+Screenshots demonstrating the trained DQN agent playing Breakout with greedy action selection:
 
 | Game 1 | Game 2 | Game 3 |
 |--------|--------|--------|
 | ![Game 1](docs/gameplay/game-1.png) | ![Game 2](docs/gameplay/game-2.png) | ![Game 3](docs/gameplay/game-3.png) |
-
-4. Compare reward level, convergence behavior, and training stability.
 
 ## Hyperparameter Tuning Deep Dive
 
@@ -197,7 +300,7 @@ Run profile note: this completed run used `TOTAL_TIMESTEPS=5000` (configurable v
 
 ### Extended experiments (exp11–exp20) — Sid
 
-Additional runs vary **replay buffer**, **target update interval**, **learning_starts**, **train frequency**, **max gradient norm**, and **gradient steps**, with the same core settings as `exp1` (`lr=1e-4`, `gamma=0.99`, `batch=32`, ε from `1.0` → `0.05` over `0.3` of training). Environment: **`ALE/Breakout-v5`**, policy: **`CnnPolicy`**.
+Additional runs vary **replay buffer**, **target update interval**, **learning_starts**, **train frequency**, **max gradient norm**, and **gradient steps**, with the same core settings as `exp1` (`lr=1e-4`, `gamma=0.99`, `batch=32`, epsilon from `1.0` to `0.05` over `0.3` of training). Environment: **`ALE/Breakout-v5`**, policy: **`CnnPolicy`**.
 
 **How to run only exp11–exp20** (skip exp1–exp10):
 
@@ -324,3 +427,110 @@ The play notebook demonstrates trained model evaluation:
 - Model/environment mismatch in gameplay: verify `MODEL_PATH` and `ENV_ID` consistency.
 - Slow training on local hardware: reduce `TOTAL_TIMESTEPS` for quick validation runs.
 - Remote rendering limitations: run gameplay on a local machine with display support.
+
+## Development
+
+### Project Structure
+
+- **Source Code**: See `/src` for training and inference implementations
+- **Notebooks**: Interactive workflows in `/notebooks`
+- **Configurations**: Template configurations in `/config`
+- **Tests**: Unit tests in `/tests`
+- **Documentation**: Guides and results in `/docs`
+
+### Code Quality
+
+We use:
+- **Black** for code formatting (100 char line length)
+- **isort** for import organization
+- **Flake8** for linting
+- **pytest** for testing
+
+Format code before committing:
+```powershell
+black src/ tests/
+isort src/ tests/
+flake8 src/
+pytest tests/
+```
+
+### Running Tests
+
+```powershell
+# Run all tests
+pytest tests/
+
+# Run with coverage
+pytest tests/ --cov=src
+
+# Run specific test
+pytest tests/test_example.py::test_numpy_operations
+```
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Code style guidelines
+- How to submit changes
+- Testing requirements
+- Documentation standards
+
+## Citation
+
+If you use this project in your research, please cite:
+
+```bibtex
+@software{dqn_atari_2026,
+  author = {Mugisha, Isaac},
+  title = {Deep Q-Networks for Atari Games},
+  year = {2026},
+  url = {https://github.com/Mugisha-isaac/Formative3-Group12-DQN}
+}
+```
+
+## License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+
+## Related Work
+
+- [Deep Q-Networks Paper](https://arxiv.org/abs/1312.5602) - Original DQN publication
+- [Stable Baselines3 Documentation](https://stable-baselines3.readthedocs.io/) - RL implementations
+- [Gymnasium Documentation](https://gymnasium.farama.org/) - RL environments
+- [Atari Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment) - Atari emulation
+
+## Authors & Acknowledgments
+
+- **Project Lead**: Isaac Mugisha
+- **Extended Experiments**: Sid
+- **Framework**: Stable Baselines3, Gymnasium, PyTorch
+
+## FAQ
+
+**Q: Which Python version should I use?**  
+A: Python 3.10, 3.11, 3.12, or 3.13. Python 3.14+ is not yet supported by ale_py.
+
+**Q: How long does training take?**  
+A: With default settings (500k timesteps), expect 1-4 hours on CPU, 15-30 minutes on modern GPU.
+
+**Q: Can I train on GPU?**  
+A: Yes! Install CUDA and PyTorch will automatically use it. Training is much faster on GPU.
+
+**Q: How do I change the game environment?**  
+A: Edit `ENV_ID` in `/src/train.py`. Available Atari environments: "ALE/Breakout-v5", "ALE/Pong-v5", etc.
+
+**Q: Can I continue training a saved model?**  
+A: You can load and evaluate models with `dqn_model.zip`, but resuming training requires additional setup.
+
+## Support
+
+For issues, questions, or suggestions:
+1. Check [Troubleshooting](#troubleshooting) section
+2. Review [CONTRIBUTING.md](CONTRIBUTING.md)
+3. Open an issue on GitHub
+4. Check existing issues/discussions
+
+---
+
+**Last Updated**: March 2026  
+**Status**: Active Development

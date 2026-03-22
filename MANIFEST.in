@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include requirements.txt
+include CONTRIBUTING.md
+recursive-include src *.py
+recursive-include tests *.py
+recursive-include notebooks *.ipynb
+recursive-include config *.yaml
+recursive-include docs *
