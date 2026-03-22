@@ -20,10 +20,18 @@ Build and evaluate a DQN agent using Stable Baselines3 and Gymnasium Atari envir
 │   ├── experiments.png       # Training results & hyperparameter comparison table
 │   ├── policy-comparison.png # CnnPolicy vs MlpPolicy performance comparison
 │   ├── play-outcome.png      # Training summary & final metrics
+│   ├── sid-experiments/      # Screenshots: extended runs exp11–exp20 (Sid)
+│   │   ├── terminal-run-header-exp11-12.png
+│   │   ├── terminal-exp14-17.png
+│   │   ├── terminal-exp18-20-best.png
+│   │   └── summary-tables-exp11-20.png
 │   └── gameplay/
 │       ├── game-1.png        # Trained agent gameplay screenshot 1
 │       ├── game-2.png        # Trained agent gameplay screenshot 2
 │       └── game-3.png        # Trained agent gameplay screenshot 3
+├── run_my_experiments.sh     # Run only exp11–exp20 (see Extended experiments)
+├── run_play.sh               # Play trained agent (CLI + optional --gui)
+├── run_play_gui.sh           # Same as run_play.sh --gui (live window)
 ├── results/
 │   ├── logs/                 # Experiment logs & TensorBoard events
 │   └── models/               # Trained model checkpoints
@@ -65,27 +73,35 @@ Note: Install dependencies once with `requirements.txt` before running `train.py
 
 ### Train
 
+Run from the `src/` directory so paths resolve to `../results/` (or adjust paths accordingly):
+
 ```powershell
-python src/train.py
+cd src
+python train.py
 ```
 
-Current default training configuration in `src/train.py`:
+To run **only exp11–exp20** (extended infrastructure sweep), use `./run_my_experiments.sh` from the repo root or set `RUN_EXTENDED_EXPERIMENTS_ONLY=1`.
 
-- Environment: `ALE/Pong-v5`
+Current defaults in `src/train.py` (verify in file if you change them):
+
+- Environment: `ALE/Breakout-v5`
 - Policy: `CnnPolicy`
-- Timesteps: `500000`
-- Model output: `./results/models/dqn_model_exp1.zip` (derived from `EXPERIMENT_NAME`)
+- Timesteps: `TOTAL_TIMESTEPS` (default `5000`; override via environment variable, e.g. `500000` for longer runs)
+- Model output: `./results/models/dqn_model_<experiment_name>.zip`; best run copied to `./results/models/dqn_model.zip`
 - Logs: `./results/logs/<experiment_name>/`
 
 ### Play
 
 ```powershell
-python src/play.py
+cd src
+python play.py
 ```
 
-Ensure playback settings match training settings:
+Optional **live window**: `python play.py --gui` or `./run_play_gui.sh` from the repo root.
 
-- `MODEL_PATH` must point to the model produced by training.
+Ensure playback settings match training:
+
+- Default model is `results/models/dqn_model.zip` (best checkpoint from training). Override with `MODEL_NAME` (filename without `.zip`).
 - `ENV_ID` in `src/play.py` must match the environment used in `src/train.py`.
 
 ## Hyperparameter Tuning Protocol
@@ -142,6 +158,7 @@ Screenshots demonstrating the trained DQN agent playing Pong with greedy action 
 | Game 1 | Game 2 | Game 3 |
 |--------|--------|--------|
 | ![Game 1](docs/gameplay/game-1.png) | ![Game 2](docs/gameplay/game-2.png) | ![Game 3](docs/gameplay/game-3.png) |
+
 4. Compare reward level, convergence behavior, and training stability.
 
 ## Hyperparameter Tuning Deep Dive
@@ -178,6 +195,70 @@ This section captures the 10 hyperparameter experiments using the shared `train.
 
 Run profile note: this completed run used `TOTAL_TIMESTEPS=5000` (configurable via environment variable in `train.py`) to fit local compute/runtime constraints while still completing all 10 required experiments.
 
+### Extended experiments (exp11–exp20) — Sid
+
+Additional runs vary **replay buffer**, **target update interval**, **learning_starts**, **train frequency**, **max gradient norm**, and **gradient steps**, with the same core settings as `exp1` (`lr=1e-4`, `gamma=0.99`, `batch=32`, ε from `1.0` → `0.05` over `0.3` of training). Environment: **`ALE/Breakout-v5`**, policy: **`CnnPolicy`**.
+
+**How to run only exp11–exp20** (skip exp1–exp10):
+
+```powershell
+./run_my_experiments.sh
+```
+
+Equivalent: `RUN_EXTENDED_EXPERIMENTS_ONLY=1` and `MEMBER_NAME` set in `run_my_experiments.sh` / environment; see `src/train.py` (`EXPERIMENTS` entries for `exp11`–`exp20`).
+
+**Run profile (documented below):** `TOTAL_TIMESTEPS=5000` per experiment.
+
+#### Results summary (exp11–exp20)
+
+| Experiment | lr | gamma | batch | eps_start | eps_end | eps_frac | Mean reward (± std) | Noted behavior |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| exp11 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.00 ± 0.00 | stable training |
+| exp12 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.67 ± 0.94 | large replay buffer |
+| exp13 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.67 ± 0.94 | target network schedule varied |
+| exp14 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.67 ± 0.94 | target network schedule varied |
+| exp15 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 1.33 ± 1.89 | best performing config |
+| exp16 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.67 ± 0.94 | learning start delay varied |
+| exp17 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.67 ± 0.94 | train frequency varied |
+| exp18 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.00 ± 0.00 | train frequency varied |
+| exp19 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.67 ± 0.94 | gradient clipping varied |
+| exp20 | 1e-4 | 0.99 | 32 | 1.0 | 0.05 | 0.30 | 0.33 ± 0.47 | multi-step gradient updates |
+
+#### Infrastructure detail (what differed per row)
+
+| Exp | buffer | tgt_upd | l_start | tr_freq | gr_st | mx_gn | Mean reward |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| exp11 | 10000 | 500 | 2000 | 4 | 1 | 10.0 | 0.00 |
+| exp12 | 50000 | 500 | 2000 | 4 | 1 | 10.0 | 0.67 |
+| exp13 | 5000 | 250 | 2000 | 4 | 1 | 10.0 | 0.67 |
+| exp14 | 5000 | 1000 | 2000 | 4 | 1 | 10.0 | 0.67 |
+| exp15 | 5000 | 500 | 1000 | 4 | 1 | 10.0 | 1.33 |
+| exp16 | 5000 | 500 | 5000 | 4 | 1 | 10.0 | 0.67 |
+| exp17 | 5000 | 500 | 2000 | 1 | 1 | 10.0 | 0.67 |
+| exp18 | 5000 | 500 | 2000 | 8 | 1 | 10.0 | 0.00 |
+| exp19 | 5000 | 500 | 2000 | 4 | 1 | 1.0 | 0.67 |
+| exp20 | 5000 | 500 | 2000 | 4 | 4 | 10.0 | 0.33 |
+
+**Best model in this extended run:** `exp15` (mean reward **1.33**), written to `results/models/dqn_model.zip` by `train.py` when this sweep finishes.
+
+#### Terminal & table screenshots (Sid)
+
+Run header and early experiments (exp11–exp12, start of exp13):
+
+![Extended run header and exp11–exp12](docs/sid-experiments/terminal-run-header-exp11-12.png)
+
+Mid sweep (exp14–exp17):
+
+![Terminal output exp14–exp17](docs/sid-experiments/terminal-exp14-17.png)
+
+Late sweep and best-model copy (exp18–exp20, `dqn_model.zip` from `exp15`):
+
+![Terminal output exp18–exp20 and best model](docs/sid-experiments/terminal-exp18-20-best.png)
+
+Full printed summary (results + infrastructure tables):
+
+![Summary tables exp11–exp20](docs/sid-experiments/summary-tables-exp11-20.png)
+
 ### Final Saved Model
 
 - The best model is saved as `dqn_model.zip`.
@@ -198,6 +279,8 @@ Current repository screenshots:
 ![Policy Comparison](docs/isaac-mugisha-experiments-policy-comparison.png)
 
 ![Play Outcome](docs/play-outcome.png)
+
+Extended experiments (exp11–exp20) — Sid: see **Extended experiments (exp11–exp20) — Sid** above and image files under `docs/sid-experiments/`.
 
 ## Notebook Workflows
 
