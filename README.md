@@ -405,9 +405,9 @@ Please include and keep updated screenshots in `docs/` for submission evidence:
 
 Current repository screenshots:
 
-![Experiment Results](docs/isaac-mugisha-experiments.png)
+![Experiment Results](docs/experiments.png)
 
-![Policy Comparison](docs/isaac-mugisha-experiments-policy-comparison.png)
+![Policy Comparison](docs/policy-comparison.png)
 
 ![Play Outcome](docs/play-outcome.png)
 
