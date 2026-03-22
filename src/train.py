@@ -1,4 +1,7 @@
-"""Run 10 DQN hyperparameter experiments and save the best model artifact.
+"""Run DQN hyperparameter experiments (exp1–exp10 + optional exp11–exp20) and save the best model.
+
+exp1–exp10: lr / gamma / batch / exploration sweeps (group baseline).
+exp11–exp20: replay / target network / train schedule / gradient settings (same lr–eps baseline as exp1).
 
 Dependencies should be installed once via requirements.txt before running this file.
 """
@@ -116,6 +119,107 @@ EXPERIMENTS = [
         "eps_end": 0.05,
         "eps_fraction": 0.30,
     },
+    # --- exp11–exp20: infrastructure / training dynamics (baseline = exp1 core hparams) ---
+    {
+        "name": "exp11",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "buffer_size": 10_000,
+    },
+    {
+        "name": "exp12",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "buffer_size": 50_000,
+    },
+    {
+        "name": "exp13",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "target_update_interval": 250,
+    },
+    {
+        "name": "exp14",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "target_update_interval": 1000,
+    },
+    {
+        "name": "exp15",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "learning_starts": 1_000,
+    },
+    {
+        "name": "exp16",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "learning_starts": 5_000,
+    },
+    {
+        "name": "exp17",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "train_freq": 1,
+    },
+    {
+        "name": "exp18",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "train_freq": 8,
+    },
+    {
+        "name": "exp19",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "max_grad_norm": 1.0,
+    },
+    {
+        "name": "exp20",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+        "gradient_steps": 4,
+    },
 ]
 
 ENV_ID = "ALE/Breakout-v5"
@@ -126,7 +230,11 @@ BUFFER_SIZE = 5_000
 TARGET_UPDATE_INTERVAL = 500
 LEARNING_STARTS = 2_000
 TRAIN_FREQ = 4
-RUN_POLICY_COMPARISON  = os.getenv("RUN_POLICY_COMPARISON", "0") == "1"
+GRADIENT_STEPS = 1
+MAX_GRAD_NORM = 10.0
+RUN_POLICY_COMPARISON = os.getenv("RUN_POLICY_COMPARISON", "0") == "1"
+# Run only exp11–exp20 (skip exp1–exp10) when set to 1 — useful for your extra runs without redoing group configs.
+RUN_EXTENDED_EXPERIMENTS_ONLY = os.getenv("RUN_EXTENDED_EXPERIMENTS_ONLY", "0") == "1"
 
 
 class RewardLengthLogger(BaseCallback):
@@ -181,6 +289,12 @@ def run_experiment(exp):
     eps_start = exp["eps_start"]
     eps_end = exp["eps_end"]
     eps_fraction = exp["eps_fraction"]
+    buffer_size = exp.get("buffer_size", BUFFER_SIZE)
+    target_update_interval = exp.get("target_update_interval", TARGET_UPDATE_INTERVAL)
+    learning_starts = exp.get("learning_starts", LEARNING_STARTS)
+    train_freq = exp.get("train_freq", TRAIN_FREQ)
+    gradient_steps = exp.get("gradient_steps", GRADIENT_STEPS)
+    max_grad_norm = exp.get("max_grad_norm", MAX_GRAD_NORM)
     log_dir = f"../results/logs/{name}/"
     os.makedirs(log_dir, exist_ok=True)
 
@@ -188,6 +302,11 @@ def run_experiment(exp):
     print(f"  {MEMBER_NAME} | {name}")
     print(f"  lr={lr}, gamma={gamma}, batch={batch}")
     print(f"  epsilon: {eps_start} -> {eps_end} over {eps_fraction} of training")
+    print(
+        f"  buffer={buffer_size}, target_update={target_update_interval}, "
+        f"learning_starts={learning_starts}, train_freq={train_freq}, "
+        f"gradient_steps={gradient_steps}, max_grad_norm={max_grad_norm}"
+    )
     print("=" * 55)
 
     train_env = build_env(ENV_ID, log_dir)
@@ -198,15 +317,17 @@ def run_experiment(exp):
         policy=POLICY,
         env=train_env,
         learning_rate=lr,
-        buffer_size=BUFFER_SIZE,
+        buffer_size=buffer_size,
         batch_size=batch,
         gamma=gamma,
         exploration_fraction=eps_fraction,
         exploration_initial_eps=eps_start,
         exploration_final_eps=eps_end,
-        target_update_interval=TARGET_UPDATE_INTERVAL,
-        learning_starts=LEARNING_STARTS,
-        train_freq=TRAIN_FREQ,
+        target_update_interval=target_update_interval,
+        learning_starts=learning_starts,
+        train_freq=train_freq,
+        gradient_steps=gradient_steps,
+        max_grad_norm=max_grad_norm,
         optimize_memory_usage=False,
         tensorboard_log=log_dir,
         verbose=0,
@@ -262,6 +383,12 @@ def run_experiment(exp):
         "eps_start": eps_start,
         "eps_end": eps_end,
         "eps_fraction": eps_fraction,
+        "buffer_size": buffer_size,
+        "target_update_interval": target_update_interval,
+        "learning_starts": learning_starts,
+        "train_freq": train_freq,
+        "gradient_steps": gradient_steps,
+        "max_grad_norm": max_grad_norm,
         "mean_reward": mean_r,
         "std_reward": std_r,
     }
@@ -293,6 +420,8 @@ def policy_comparison():
             target_update_interval=TARGET_UPDATE_INTERVAL,
             learning_starts=LEARNING_STARTS,
             train_freq=TRAIN_FREQ,
+            gradient_steps=GRADIENT_STEPS,
+            max_grad_norm=MAX_GRAD_NORM,
             optimize_memory_usage=False,
             verbose=0,
         )
@@ -327,8 +456,38 @@ def policy_comparison():
     print("=" * 55)
 
 
+def _behavior_note(r, best_reward):
+    if r["mean_reward"] >= best_reward:
+        return "best performing config"
+    if r["lr"] > 5e-4:
+        return "high lr - unstable learning"
+    if r["gamma"] < 0.97:
+        return "low gamma - short-sighted"
+    if r["batch"] >= 128:
+        return "large batch - slow updates"
+    if r["eps_end"] >= 0.10:
+        return "high eps_end - more exploration"
+    if r["buffer_size"] >= 50_000:
+        return "large replay buffer"
+    if r["target_update_interval"] != TARGET_UPDATE_INTERVAL:
+        return "target network schedule varied"
+    if r["learning_starts"] != LEARNING_STARTS:
+        return "learning start delay varied"
+    if r["train_freq"] != TRAIN_FREQ:
+        return "train frequency varied"
+    if r["gradient_steps"] != GRADIENT_STEPS:
+        return "multi-step gradient updates"
+    if r["max_grad_norm"] != MAX_GRAD_NORM:
+        return "gradient clipping varied"
+    return "stable training"
+
+
 def main():
-    print("\n  Running 10 experiments for", MEMBER_NAME)
+    to_run = EXPERIMENTS[10:] if RUN_EXTENDED_EXPERIMENTS_ONLY else EXPERIMENTS
+    n_exp = len(to_run)
+    print("\n  Running", n_exp, "experiments for", MEMBER_NAME)
+    if RUN_EXTENDED_EXPERIMENTS_ONLY:
+        print("  (RUN_EXTENDED_EXPERIMENTS_ONLY=1: exp11–exp20 only)")
     print("  Environment:", ENV_ID)
     print("  Policy:", POLICY)
     print("  Total timesteps per experiment:", TOTAL_TIMESTEPS)
@@ -338,7 +497,7 @@ def main():
     best_reward = -float("inf")
     best_model_name = None
 
-    for exp in EXPERIMENTS:
+    for exp in to_run:
         result = run_experiment(exp)
         results.append(result)
         print(
@@ -367,22 +526,42 @@ def main():
     )
     print("-" * 90)
     for r in results:
-        if r["mean_reward"] >= best_reward:
-            note = "best performing config"
-        elif r["lr"] > 5e-4:
-            note = "high lr - unstable learning"
-        elif r["gamma"] < 0.97:
-            note = "low gamma - short-sighted"
-        elif r["batch"] >= 128:
-            note = "large batch - slow updates"
-        elif r["eps_end"] >= 0.10:
-            note = "high eps_end - more exploration"
-        else:
-            note = "stable training"
+        note = _behavior_note(r, best_reward)
         print(
             f"  {r['name']:<6} {r['lr']:<8} {r['gamma']:<7} {r['batch']:<7} {r['eps_start']:<10} {r['eps_end']:<9} {r['eps_fraction']:<10} {r['mean_reward']:<12.2f} {note}"
         )
     print("=" * 90)
+
+    extended_rows = []
+    for r in results:
+        if not r["name"].startswith("exp"):
+            continue
+        try:
+            if int(r["name"].replace("exp", "")) >= 11:
+                extended_rows.append(r)
+        except ValueError:
+            continue
+    if extended_rows:
+        print("\n" + "=" * 115)
+        print(
+            "  INFRASTRUCTURE DETAIL (exp11–exp20): buffer, target update, learning_starts, "
+            "train_freq, grad_steps, max_grad_norm"
+        )
+        print("=" * 115)
+        hdr = (
+            f"  {'Exp':<6} {'buffer':<9} {'tgt_upd':<8} {'l_start':<8} {'tr_freq':<8} {'gr_st':<6} "
+            f"{'mx_gn':<8} {'Mean':<8} {'Note'}"
+        )
+        print(hdr)
+        print("-" * 115)
+        for r in extended_rows:
+            note = _behavior_note(r, best_reward)
+            print(
+                f"  {r['name']:<6} {r['buffer_size']:<9} {r['target_update_interval']:<8} "
+                f"{r['learning_starts']:<8} {r['train_freq']:<8} {r['gradient_steps']:<6} "
+                f"{r['max_grad_norm']:<8.1f} {r['mean_reward']:<8.2f} {note}"
+            )
+        print("=" * 115)
 
     if RUN_POLICY_COMPARISON:
         policy_comparison()
