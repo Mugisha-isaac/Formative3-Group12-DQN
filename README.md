@@ -104,7 +104,7 @@ This is a collaborative group project with clear role divisions and shared respo
 - First 10 rows in the hyperparameter table (exp1–exp10)  
 - MLP vs CNN policy comparison findings  
 
-### Gikundiro Liliane — Hyperparameter Tuning Deep Dive
+### Ange Constance  — Hyperparameter Tuning Deep Dive
 
 **Completed Work:**
 - Ran 10 comprehensive hyperparameter experiments (exp11–exp20) using the shared `train.py`
@@ -123,7 +123,7 @@ This is a collaborative group project with clear role divisions and shared respo
 - Summary of insights on best configurations and trade-offs  
 - Final `dqn_model.zip` (best model selected from exp15)  
 
-### Ange Constance — Evaluation & Presentation Lead
+### Gikundiro Liliane — Evaluation & Presentation Lead
 
 **Completed Work:**
 - Wrote `play.py` for model inference and gameplay visualization with greedy policy
