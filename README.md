@@ -81,6 +81,89 @@ This project addresses the required tasks:
 4. Track reward and episode-length behavior.
 5. Evaluate gameplay using a trained model with greedy policy.
 
+## Group Collaboration and Individual Contribution
+
+This is a collaborative group project with clear role divisions and shared responsibilities. All three team members have contributed equally to the implementation and will present together.
+
+### Ange Constance — Environment Setup & Training Foundation
+
+**Completed Work:**
+- Selected the Atari (Breakout) environment and justified the choice for DQN learning
+- Wrote the core `train.py` script with environment setup, DQN agent definition, and model saving
+- Compared `MlpPolicy` vs `CnnPolicy` with comprehensive analysis
+- Ran 10 hyperparameter experiments (baseline: exp1–exp10)
+- Logged reward trends and episode lengths for all experiments
+
+**Presentation Responsibilities:**
+- Will present their 10 baseline experiments and key findings (2 minutes)
+- Will discuss MLP vs CNN policy trade-offs and performance differences
+- Will answer Q&A on environment selection and baseline configuration choices
+
+**Deliverables Complete:**
+- Core `train.py` implementation  
+- First 10 rows in the hyperparameter table (exp1–exp10)  
+- MLP vs CNN policy comparison findings  
+
+### Gikundiro Liliane — Hyperparameter Tuning Deep Dive
+
+**Completed Work:**
+- Ran 10 comprehensive hyperparameter experiments (exp11–exp20) using the shared `train.py`
+- Explored the impact of replay buffer, target update interval, learning start, train frequency, gradient steps, and gradient norm
+- Identified the best-performing configuration across all group experiments (exp15)
+- Documented which infrastructure changes helped vs. hurt performance
+
+**Presentation Responsibilities:**
+- Will present their 10 infrastructure sweep experiments and analysis (2 minutes)
+- Will discuss the best-performing configuration and why exp15 excelled
+- Will explain hyperparameter trade-offs and performance insights
+
+**Deliverables Complete:**
+- Infrastructure sweep experiments (exp11–exp20)  
+- Second 10 rows in the hyperparameter table  
+- Summary of insights on best configurations and trade-offs  
+- Final `dqn_model.zip` (best model selected from exp15)  
+
+### Isaac Mugisha — Evaluation & Presentation Lead
+
+**Completed Work:**
+- Wrote `play.py` for model inference and gameplay visualization with greedy policy
+- Ran 10 validation hyperparameter experiments (exp21–exp30)
+- Recorded gameplay videos demonstrating trained agent performance
+- Wrote and maintained the comprehensive `README.md` with full documentation
+- Coordinated group efforts and prepared presentation materials
+
+**Presentation Responsibilities:**
+- Will present their 10 validation experiments (2 minutes)
+- Will lead the gameplay video demonstration showing the trained agent in action
+- Will coordinate the overall group presentation and manage Q&A
+
+**Deliverables Complete:**
+- `play.py` implementation for model inference and visualization  
+- Validation experiments (exp21–exp30)  
+- Third 10 rows in the hyperparameter table  
+- Complete `README.md` with hyperparameter tables, setup instructions, and results  
+- Gameplay video clips demonstrating trained agent performance  
+
+### Shared Responsibilities (All Three Members)
+
+**Completed Work:**
+- All members have contributed equally to the final GitHub repository with high code quality
+- Collaborative debugging and problem-solving throughout the project development
+- 30 total hyperparameter experiments have been executed (10 per member using shared baseline code)
+- 1 comprehensive evaluation framework (`play.py`) has been developed and tested
+- 1 polished, production-ready GitHub repository has been created and documented
+
+**Presentation Responsibilities:**
+- Each member will present their own 10 experiments during the group presentation (2 minutes each)
+- All members will be ready to answer Q&A on hyperparameter trade-offs, policy choices, and model behavior
+- Team will collectively demonstrate the full DQN learning pipeline and gameplay visualization
+
+**Group Achievement:**
+- 30 total hyperparameter experiments (10 per member, same baseline shared code)
+- 1 comprehensive evaluation framework (`play.py`)
+- 1 polished, production-ready GitHub repository
+- 1 unified presentation demonstrating the full DQN learning pipeline on Atari Breakout
+
 ## Technology Stack
 
 - **Python 3.10 - 3.13** (Required for Atari support via ale_py)
