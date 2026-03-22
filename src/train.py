@@ -1,7 +1,8 @@
-"""Run DQN hyperparameter experiments (exp1–exp10 + optional exp11–exp20) and save the best model.
+"""Run DQN hyperparameter experiments (exp1–exp30) and save the best model.
 
 exp1–exp10: lr / gamma / batch / exploration sweeps (group baseline).
 exp11–exp20: replay / target network / train schedule / gradient settings (same lr–eps baseline as exp1).
+exp21–exp30: repeat of exp1–exp10 for validation.
 
 Dependencies should be installed once via requirements.txt before running this file.
 """
@@ -219,6 +220,97 @@ EXPERIMENTS = [
         "eps_end": 0.05,
         "eps_fraction": 0.30,
         "gradient_steps": 4,
+    },
+    # --- exp21–exp30 ---
+    {
+        "name": "exp21",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp22",
+        "lr": 5e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp23",
+        "lr": 1e-3,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp24",
+        "lr": 1e-4,
+        "gamma": 0.95,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp25",
+        "lr": 1e-4,
+        "gamma": 0.999,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp26",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 64,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp27",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 128,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
+    },
+    {
+        "name": "exp28",
+        "lr": 1e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 1.0,
+        "eps_end": 0.10,
+        "eps_fraction": 0.50,
+    },
+    {
+        "name": "exp29",
+        "lr": 2e-4,
+        "gamma": 0.98,
+        "batch": 64,
+        "eps_start": 1.0,
+        "eps_end": 0.05,
+        "eps_fraction": 0.40,
+    },
+    {
+        "name": "exp30",
+        "lr": 3e-4,
+        "gamma": 0.99,
+        "batch": 32,
+        "eps_start": 0.8,
+        "eps_end": 0.05,
+        "eps_fraction": 0.30,
     },
 ]
 
