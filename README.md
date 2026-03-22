@@ -251,7 +251,21 @@ Final training metrics and model performance:
 
 **Gameplay Video:**
 
-[Watch Gameplay Video](docs/gameplay/WhatsApp%20Video%202026-03-21%20at%2022.00.38.mp4) - Video showing the trained DQN agent playing Breakout
+ 
+
+https://github.com/user-attachments/assets/389e6b8c-e292-49c8-a2f2-91a9625ef6ee
+
+
+
+https://github.com/user-attachments/assets/241147d1-bf1f-4ecf-9308-b7eac8a9e699
+
+
+
+https://github.com/user-attachments/assets/32aa4a7c-f8b3-4fd2-af89-5ba12affc2cd
+
+
+
+
 
 **Gameplay Screenshots:**
 
